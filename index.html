@@ -333,6 +333,7 @@
   .pill.match { background: rgba(83,52,131,.4); border-color: var(--accent2); color: #c9b8ff; }
   .pill.speaker-cristina { background: rgba(45,80,130,.45); border-color: #3a6abf; color: #a8c8ff; }
   .pill.speaker-nestor   { background: rgba(130,70,30,.45); border-color: #b86030; color: #ffcca8; }
+  .pill.speaker-maximo   { background: rgba(30,115,110,.45); border-color: #2fa39a; color: #a8f0e6; }
   .pill.dup-group        { font-weight: 600; }
   .pill.location-prov    { background: rgba(180,140,30,.4);  border-color: #b89030; color: #ffe2a0; }
   .pill.location-loc     { background: rgba(140,180,80,.35); border-color: #82a020; color: #d5f0b0; }
@@ -876,6 +877,7 @@
 
   .landing-card.lc-speaker-cristina:hover { border-color: #6a92d8; }
   .landing-card.lc-speaker-nestor:hover   { border-color: #d89060; }
+  .landing-card.lc-speaker-maximo:hover   { border-color: #4fc4b8; }
 
   .landing-list {
     display: grid;
@@ -1101,6 +1103,7 @@
       <option value="">Orador</option>
       <option value="Cristina">Cristina</option>
       <option value="Néstor">Néstor</option>
+      <option value="Máximo">Máximo</option>
     </select>
     <select id="hYear"  onchange="onHeaderFilterChange()"><option value="">Año</option></select>
     <select id="hMonth" onchange="onHeaderFilterChange()"><option value="">Mes</option></select>
@@ -1435,12 +1438,13 @@ function landingBreadcrumb() {
 
 // ─── LANDING RENDER ─────────────────────────────────────────────────────────
 
-const SPEAKER_LANDING_ORDER = ['Cristina', 'Néstor'];
+const SPEAKER_LANDING_ORDER = ['Cristina', 'Néstor', 'Máximo'];
 const SPEAKER_DESC = {
   'Cristina': 'Discursos de Cristina Fernández de Kirchner',
   'Néstor':   'Discursos de Néstor Kirchner',
+  'Máximo':   'Discursos de Máximo Kirchner',
 };
-const SPEAKER_ICON = { 'Cristina': '🟦', 'Néstor': '🟧' };
+const SPEAKER_ICON = { 'Cristina': '🟦', 'Néstor': '🟧', 'Máximo': '🟩' };
 
 function landingCountsByYear() {
   const counts = {};
@@ -1536,14 +1540,14 @@ function renderLanding() {
       <div class="landing-inner">
         <div class="landing-hero">
           <h1>dis<span class="accent">Kursos</span></h1>
-          <p>Explorá los discursos de Cristina Fernández de Kirchner y Néstor Kirchner. Elegí cómo querés navegar el corpus.</p>
+          <p>Explorá los discursos de Cristina Fernández de Kirchner, Néstor Kirchner y Máximo Kirchner. Elegí cómo querés navegar el corpus.</p>
         </div>
         <div class="landing-grid">
           <div class="landing-card" onclick="landingGo('speaker')">
             <div class="lc-icon">👤</div>
             <div>
               <div class="lc-title">Por orador</div>
-              <div class="lc-desc">Filtrar entre Cristina y Néstor.</div>
+              <div class="lc-desc">Filtrar entre Cristina, Néstor y Máximo.</div>
             </div>
             <div class="lc-arrow">→</div>
           </div>
@@ -1783,7 +1787,7 @@ function countSpeaker(sp) {
 
 let openYears = {};  // 'speaker/YYYY' → bool
 
-const SPEAKER_ORDER = ['Cristina', 'Néstor'];
+const SPEAKER_ORDER = ['Cristina', 'Néstor', 'Máximo'];
 
 function renderSidebar() {
   const speakers = SPEAKER_ORDER.filter(sp => tree[sp]);
@@ -3603,7 +3607,7 @@ function openReader(idx, idxMap) {
     <div class="reader-title">${escHtml(displayTitle(s.title||''))}</div>
     <div class="reader-meta-row">
       ${s.text ? `<span class="pill">${s.text.trim().split(/\s+/).filter(Boolean).length.toLocaleString('es-AR')} palabras</span>` : ''}
-      ${s.url ? `<a class="reader-link" href="${escHtml(s.url)}" target="_blank" rel="noopener">Ver en cfkargentina.com ↗</a>` : ''}
+      ${/^https?:/.test(s.url||'') ? `<a class="reader-link" href="${escHtml(s.url)}" target="_blank" rel="noopener">Ver en cfkargentina.com ↗</a>` : ''}
     </div>
     <div class="reader-text">${textHtml}</div>`;
 
@@ -3819,6 +3823,7 @@ function renderStats() {
       <div class="stat-card"><div class="label">Total discursos</div><div class="value">${st.total.toLocaleString('es-AR')}</div></div>
       <div class="stat-card"><div class="label">Cristina</div><div class="value">${(speakerCounts['Cristina']||0).toLocaleString('es-AR')}</div></div>
       <div class="stat-card"><div class="label">Néstor</div><div class="value">${(speakerCounts['Néstor']||0).toLocaleString('es-AR')}</div></div>
+      <div class="stat-card"><div class="label">Máximo</div><div class="value">${(speakerCounts['Máximo']||0).toLocaleString('es-AR')}</div></div>
       <div class="stat-card"><div class="label">Palabras totales</div><div class="value">${st.totalWords.toLocaleString('es-AR')}</div></div>
       <div class="stat-card"><div class="label">Promedio palabras</div><div class="value">${st.avgWords.toLocaleString('es-AR')}</div></div>
       <div class="stat-card"><div class="label">Mediana palabras</div><div class="value">${st.medianWords.toLocaleString('es-AR')}</div></div>
@@ -3957,9 +3962,9 @@ function renderTimeline() {
     if (!s.date || s.date.length < 4) continue;
     const y = s.date.slice(0,4);
     if (!/^\d{4}$/.test(y)) continue;
-    if (!years.has(y)) years.set(y, {Cristina:0, 'Néstor':0, other:0});
+    if (!years.has(y)) years.set(y, {Cristina:0, 'Néstor':0, 'Máximo':0, other:0});
     const sp = s.speaker;
-    if (sp === 'Cristina' || sp === 'Néstor') years.get(y)[sp]++;
+    if (sp === 'Cristina' || sp === 'Néstor' || sp === 'Máximo') years.get(y)[sp]++;
     else years.get(y).other++;
   }
   const sorted = [...years].sort((a,b) => a[0].localeCompare(b[0]));
@@ -3967,7 +3972,7 @@ function renderTimeline() {
 
   const W = 1000, H = 320, padL = 40, padR = 20, padT = 20, padB = 40;
   const innerW = W - padL - padR, innerH = H - padT - padB;
-  const max = Math.max(...sorted.map(([,v]) => v.Cristina + v['Néstor'] + v.other));
+  const max = Math.max(...sorted.map(([,v]) => v.Cristina + v['Néstor'] + v['Máximo'] + v.other));
   const barW = innerW / sorted.length;
   const barInner = barW * 0.7;
 
@@ -3983,16 +3988,21 @@ function renderTimeline() {
 
   const bars = sorted.map(([year, v], i) => {
     const x = padL + i*barW + (barW-barInner)/2;
-    const totC = v.Cristina, totN = v['Néstor'], totO = v.other;
-    const tot = totC + totN + totO;
+    const totC = v.Cristina, totN = v['Néstor'], totM = v['Máximo'], totO = v.other;
+    const tot = totC + totN + totM + totO;
     const hC = (totC/max)*innerH;
     const hN = (totN/max)*innerH;
+    const hM = (totM/max)*innerH;
     const hO = (totO/max)*innerH;
     let yBase = padT + innerH;
     let html = '';
     if (totN) {
       yBase -= hN;
       html += `<rect class="timeline-bar" x="${x}" y="${yBase}" width="${barInner}" height="${hN}" fill="#e89441" onclick="filterByYear('${year}','Néstor')"><title>${year} · Néstor: ${totN}</title></rect>`;
+    }
+    if (totM) {
+      yBase -= hM;
+      html += `<rect class="timeline-bar" x="${x}" y="${yBase}" width="${barInner}" height="${hM}" fill="#3fb8ad" onclick="filterByYear('${year}','Máximo')"><title>${year} · Máximo: ${totM}</title></rect>`;
     }
     if (totC) {
       yBase -= hC;
@@ -4012,6 +4022,7 @@ function renderTimeline() {
     <div class="timeline-legend">
       <span><span class="sw" style="background:#4dbb6a"></span>Cristina</span>
       <span><span class="sw" style="background:#e89441"></span>Néstor</span>
+      <span><span class="sw" style="background:#3fb8ad"></span>Máximo</span>
       <span><span class="sw" style="background:#7aA07f"></span>Sin orador</span>
       <span style="color:var(--text-dim); margin-left:auto">Click en barra → filtra por año (y orador)</span>
     </div>
